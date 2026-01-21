@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Tenant {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users      User[]
+  roles      Role[]
+  products   Product[]
+  movements  StockMovement[]
+  auditLogs  AuditLog[]
+  idemKeys   IdempotencyKey[]
+
+  @@index([createdAt])
+}
+
+model User {
+  id        String   @id @default(uuid())
+  tenantId  String
+  email     String
+  name      String?
+  roleId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  role   Role   @relation(fields: [roleId], references: [id])
+
+  @@unique([tenantId, email])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, roleId])
+}
+
+model Role {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  // simple RBAC: store permissions as strings like "product:read"
+  permissions String[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  users  User[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  tenantId  String
+  sku       String
+  name      String
+  unit      String?  // "pcs", "kg", etc
+  deletedAt DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id])
+  movements StockMovement[]
+
+  @@unique([tenantId, sku])
+  @@index([tenantId, createdAt])
+  @@index([tenantId, deletedAt])
+}
+
+enum MovementType {
+  IN
+  OUT
+  ADJUST
+}
+
+model StockMovement {
+  id        String       @id @default(uuid())
+  tenantId  String
+  productId String
+  type      MovementType
+  quantity  Int
+  note      String?
+  createdBy String?      // userId (nullable for system jobs)
+  createdAt DateTime     @default(now())
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, productId, createdAt])
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  tenantId  String
+  actorId   String?  // userId
+  action    String   // "product.create", "product.update", etc
+  entity    String   // "Product"
+  entityId  String
+  meta      Json?
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, entity, entityId])
+}
+
+model IdempotencyKey {
+  id          String   @id @default(uuid())
+  tenantId    String
+  key         String
+  method      String
+  path        String
+  requestHash String
+  response    Json
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, key])
+  @@index([tenantId, expiresAt])
+}
