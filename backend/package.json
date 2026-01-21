@@ -13,8 +13,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
+  "type": "module",
   "dependencies": {
+    "@fastify/request-context": "^6.2.1",
+    "@fastify/sensible": "^6.0.4",
     "@fastify/swagger": "^9.6.1",
     "@fastify/swagger-ui": "^5.2.4",
     "dotenv": "^17.2.3",

@@ -1,15 +1,27 @@
 import Fastify from "fastify";
+import requestContextPlugin from "./plugins/requestContext.js";
 
 const app = Fastify({
-  logger: true, // Fastify uses pino under the hood
+  logger: {
+    level: "info",
+    transport: process.env.NODE_ENV !== "production"
+      ? { target: "pino-pretty" }
+      : undefined,
+  },
 });
-
-app.get("/health", async () => ({ ok: true }));
 
 const port = Number(process.env.PORT ?? 3000);
 const host = process.env.HOST ?? "0.0.0.0";
 
-app.listen({ port, host }).catch((err) => {
+// Register plugins before routes
+await app.register(requestContextPlugin);
+
+// Routes
+app.get("/health", async () => ({ ok: true }));
+
+try {
+  await app.listen({ port, host });
+} catch (err) {
   app.log.error(err);
   process.exit(1);
-});
+}
