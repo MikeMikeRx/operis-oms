@@ -1,0 +1,22 @@
+meta {
+  name: List products
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/v1/products
+  body: none
+  auth: inherit
+}
+
+headers {
+  x-tenant-id: {{x-tenant-id}}
+  x-user-id: {{x-user-id}}
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

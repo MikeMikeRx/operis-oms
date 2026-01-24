@@ -1,0 +1,21 @@
+meta {
+  name: Cross-tenant isolation
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/v1/products?x-tenant-id=t2&x-user-id=u1
+  body: none
+  auth: inherit
+}
+
+params:query {
+  x-tenant-id: t2
+  x-user-id: u1
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

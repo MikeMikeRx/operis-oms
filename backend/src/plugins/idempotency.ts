@@ -63,6 +63,8 @@ export default fp(async function (app: FastifyInstance) {
   app.addHook("onSend", async (req, reply, payload) => {
     if (!req.idempotency) return;
 
+    if (reply.statusCode >= 400) return payload;
+
     const { tenantId, key, method, path, requestHash } = req.idempotency;
 
     const responseBody =

@@ -1,0 +1,20 @@
+meta {
+  name: Delete product
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/v1/products/dfd61677-a274-48ff-8adf-55dc7f19c964
+  body: none
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: delete-prod-2
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

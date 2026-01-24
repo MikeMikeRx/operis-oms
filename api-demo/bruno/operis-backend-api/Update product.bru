@@ -1,0 +1,30 @@
+meta {
+  name: Update product
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/v1/products/dfd61677-a274-48ff-8adf-55dc7f19c964
+  body: json
+  auth: inherit
+}
+
+headers {
+  x-tenant-id: {{x-tenant-id}}
+  x-user-id: {{x-user-id}}
+  Content-Type: application/json
+  Idempotency-Key: update-prod-2
+}
+
+body:json {
+  {
+    "name": "Updated Product Name",
+    "price": 350
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

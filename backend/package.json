@@ -7,7 +7,7 @@
     "dev": "tsx watch --env-file .env src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
-    "typecheck": "node dist/server",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "worker": "tsx src/worker.ts"
   },
