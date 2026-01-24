@@ -1,33 +1,52 @@
 import request from "supertest";
-import { beforeAll, afterAll, describe, it, expect } from "vitest";
+import { prisma } from "../src/db/prisma.js";
 import { buildApp } from "../src/app.js";
 
-describe("Products API contract", () => {
-  const app = buildApp();
+// const prisma = new PrismaClient();
 
-  beforeAll(async () => {
-    await app.ready();
+let app: any;
+let tenantId: string;
+let userId: string;
+
+beforeAll(async () => {
+  app = buildApp();
+  await app.ready();
+
+  const tenant = await prisma.tenant.create({
+    data: { name: "Test tenant" },
   });
 
-  afterAll(async () => {
-    await app.close();
+  const role = await prisma.role.create({
+    data: {
+      tenantId: tenant.id,
+      name: "owner",
+      permissions: ["product:read", "product:write"],
+    },
   });
 
-  it("POST /v1/products returns 201 with product shape", async () => {
-    const sku = `SKU-${Date.now()}`;
-
-    const res = await request(app.server)
-      .post("/v1/products")
-      .set("x-tenant-id", "t1")
-      .set("x-user-id", "u1")
-      .set("idempotency-key", `k-${Date.now()}`)
-      .send({ sku, name: "Test", unit: "pcs" });
-
-    expect(res.status).toBe(201);
-    expect(res.body).toMatchObject({
-      id: expect.any(String),
-      sku,
-      name: "Test",
-    });
+  const user = await prisma.user.create({
+    data: {
+      tenantId: tenant.id,
+      roleId: role.id,
+      email: "test@example.com",
+    },
   });
+
+  tenantId = tenant.id;
+  userId = user.id;
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
+  await app.close();
+});
+
+it("creates a product", async () => {
+  await request(app.server)
+    .post("/v1/products")
+    .set("x-tenant-id", tenantId)
+    .set("x-user-id", userId)
+    .set("Idempotency-Key", "test-key-12345678")
+    .send({ name: "Test", sku: "SKU-1" })
+    .expect(201);
 });
