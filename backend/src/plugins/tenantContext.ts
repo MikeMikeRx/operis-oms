@@ -7,7 +7,7 @@ declare module "fastify" {
   }
 }
 
-const PUBLIC_PATHS = ["/health", "/docs", "/docs/"];
+const PUBLIC_PATHS = ["/health", "/docs", "/docs/", "/api/v1/meta"];
 
 export default fp(async function (app: FastifyInstance) {
   app.addHook("onRequest", async (req, reply) => {

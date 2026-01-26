@@ -1,0 +1,59 @@
+# Changelog
+
+All notable changes to this project are documented in this file.
+
+This project follows **API versioning discipline**:
+- Public API lives under `/api/v{N}`
+- **Never break an existing API version**
+- Breaking changes require a new version (`/api/v2`, `/api/v3`, …)
+
+---
+
+## [Unreleased]
+
+### Added
+- Initial `/api/v1` product CRUD endpoints
+- Multi-tenant support with RBAC
+- Idempotency support for write operations
+- Audit logging for mutating actions
+- Redis-backed background worker
+- OpenAPI (Swagger) documentation
+
+### Changed
+- Enforced `/api/v1` prefix for all public routes
+- Standardized write responses for idempotency safety
+
+### Fixed
+- CI pipeline stability
+- Contract tests for authenticated endpoints
+
+### Deprecated
+- Nothing
+
+### Removed
+- Nothing
+
+### Security
+- Tenant isolation enforced at query layer
+- Permission checks required for write operations
+
+---
+
+## Versioning & Deprecation Policy
+
+### API Versioning
+- `/api/v1` is **stable**
+- Breaking changes **must not** be introduced into `/api/v1`
+- Breaking changes require a new major version (`/api/v2`)
+
+### Deprecation
+- Deprecated endpoints remain available for **90 days**
+- Deprecations must be listed under **Deprecated**
+- Removal must be listed under **Removed** in the next version
+
+---
+
+## Changelog Rules (non-negotiable)
+- Every PR that changes behavior updates this file
+- No silent breaking changes
+- No retroactive edits to released versions

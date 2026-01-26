@@ -7,10 +7,11 @@ export default fp(async function (app: FastifyInstance) {
   await app.register(swagger, {
     openapi: {
       info: {
-        title: "Operis OSM API",
+        title: "OPERIS OSM API",
         description: "Backend-first Operations Management API",
-        version: "1.0.0",
+        version: "v1",
       },
+      // servers: [],
     },
   });
 

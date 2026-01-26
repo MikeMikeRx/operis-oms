@@ -6,7 +6,7 @@ import { writeAudit } from "../audit/audit.js";
 
 export async function productsRoutes(app: FastifyInstance) {
   app.get(
-    "/v1/products",
+    "/products",
     {
       preHandler: [requirePerm("product:read")],
       config: { rateLimit: { max: 120, timeWindow: "1 minute" } },
@@ -28,7 +28,7 @@ export async function productsRoutes(app: FastifyInstance) {
   );
 
   app.post(
-    "/v1/products",
+    "/products",
     {
       preHandler: [requirePerm("product:write")],
       config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
@@ -54,7 +54,7 @@ export async function productsRoutes(app: FastifyInstance) {
   );
 
   app.patch(
-    "/v1/products/:id",
+    "/products/:id",
     {
       preHandler: [requirePerm("product:write")],
       config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
@@ -97,7 +97,7 @@ export async function productsRoutes(app: FastifyInstance) {
   );
 
   app.delete(
-    "/v1/products/:id",
+    "/products/:id",
     {
       preHandler: [requirePerm("product:write")],
       config: { rateLimit: { max: 60, timeWindow: "1 minute" } },

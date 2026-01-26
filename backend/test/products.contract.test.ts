@@ -43,7 +43,7 @@ afterAll(async () => {
 
 it("creates a product", async () => {
   await request(app.server)
-    .post("/v1/products")
+    .post("/api/v1/products")
     .set("x-tenant-id", tenantId)
     .set("x-user-id", userId)
     .set("Idempotency-Key", "test-key-12345678")

@@ -38,7 +38,7 @@ export function buildApp() {
   app.register(swaggerPlugin);        // OpenAPI docs at /docs
 
   // --- Business routes ---
-  app.register(productsRoutes);       // /v1/products
+  app.register(productsRoutes, { prefix: "/api/v1" });
 
   // --- System routes ---
   app.get(
@@ -55,6 +55,14 @@ export function buildApp() {
       },
     },
     async () => ({ ok: true }),
+  );
+
+  app.get(
+    "/api/v1/meta", async () => ({
+      version: "v1",
+      commit: process.env.GIT_COMMIT ?? "unknown",
+      builtAt: process.env.BUILD_TIME ?? "unknown",
+    })
   );
 
   return app;
