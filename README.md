@@ -1,72 +1,113 @@
-# Operis
+# OPERIS CORE
 
-**Operis** is a backend-first **Operations Management System (OMS)** for small to mid-sized businesses.
+**Operis Operations Core** is a backend-first, multi-tenant API providing reliable foundations for internal business operations.
 
-It provides a structured, auditable way to record and control **internal business operations** such as expenses, approvals, and operational records.  
-The system is designed to start simple and evolve into a robust operational backbone.
-
----
-
-## Development Status
-
-🚧 **Under active development**
-
-This project is in its initial phase.
-Focus is on backend foundations, operational correctness, and core domain modeling.
+The system prioritizes **operational correctness, data isolation, and reliability** over UI or feature breadth.
 
 ---
 
-## Scope & Philosophy
+## What This Project Is
 
-- Backend-first
-- API-driven
-- Operations over UI
-- Control, traceability, and correctness as priorities
-- Simple core → robust extensions
+- A multi-tenant SaaS API
+- Backend-first and API-only (no frontend)
+- Designed around real-world operational constraints
+- Built with production patterns from day one
 
-Operis is **not** a CRM and **not** a full ERP.  
-It focuses on **internal operational discipline**.
-
----
-
-## Current Domain (Phase 1)
-
-### Expense Operations
-- Record company expenses
-- Enforce approval workflows
-- Track spending by employee, department, and period
-- Maintain a complete audit trail of actions
-
-Future domains (planned, not implemented yet):
-- Inventory operations
-- Cost and budget control
-- Operational reporting
+This is **not a demo app**.  
+It is a **backend product skeleton** that could safely run in production.
 
 ---
 
-## Features
+## What Is Implemented
 
-- **Multi-Tenant Core** – Company-level isolation and control
-- **Expense Records** – Structured expense data with lifecycle states
-- **Approval Workflows** – Role-based approval and rejection
-- **Audit Logging** – Immutable record of operational actions
-- **Idempotency** – Safe retries for write operations
-- **Rate Limiting** – Per-tenant request quotas via Redis
-- **Background Workers** – BullMQ jobs for maintenance tasks
-- **API-First Design** – No UI dependency
+### Core Capabilities
+
+- **Multi-Tenancy**
+  - Strict tenant isolation
+  - All data scoped by `tenantId`
+  - Tenant-aware indexing strategy
+
+- **RBAC (Role-Based Access Control)**
+  - Role-based permissions
+  - Middleware-enforced access checks
+  - No route bypasses authorization
+
+- **Product Operations**
+  - Create, list, update, soft-delete products
+  - Tenant-scoped access only
+  - Pagination and rate limiting applied
+
+- **Audit Logging**
+  - Immutable audit trail for write operations
+  - Tracks actor, action, entity, and timestamp
+  - Retention policies enforced
+
+- **Idempotency**
+  - Required for all write requests
+  - Safe retries with persisted responses
+  - Conflict detection on key reuse
+
+- **Rate Limiting**
+  - Redis-backed
+  - Per-tenant request quotas
+  - Enforced at route level
+
+- **Background Workers**
+  - BullMQ + Redis
+  - Scheduled maintenance and cleanup jobs
+  - Retry and failure handling
+
+- **Data Retention**
+  - Soft-deleted records purged automatically
+  - Audit logs retained for a fixed window
+  - Expired idempotency keys cleaned up
+
+- **Contract Testing**
+  - HTTP-level contract tests
+  - CI-enforced
+  - OpenAPI kept in sync with behavior
+
+---
+
+## What This Project Is Not
+
+- Not a CRM  
+- Not a full ERP  
+- Not UI-driven  
+- Not feature-complete business software  
+
+This project exists to demonstrate **backend operations**, not product features.
 
 ---
 
 ## Tech Stack
 
 - **Runtime**: Node.js
-- **Framework**: Fastify
 - **Language**: TypeScript
-- **Database**: PostgreSQL + Prisma 7
-- **Cache/Queue**: Redis + BullMQ
+- **Framework**: Fastify
+- **Database**: PostgreSQL
+- **ORM**: Prisma 7
+- **Cache / Queue**: Redis + BullMQ
 - **Validation**: Zod
-- **API Docs**: Swagger / OpenAPI
+- **API Docs**: OpenAPI (Swagger)
 - **Logging**: Pino
+- **Testing**: Vitest + Supertest
+- **CI**: GitHub Actions
+- **Containerization**: Docker Compose
+
+---
+
+## API
+
+- Base path: `/api/v1`
+- OpenAPI docs: `/docs`
+- Health check: `/health`
+- Meta endpoint: `/api/v1/meta`
+
+All write endpoints require:
+- `Idempotency-Key`
+- `x-tenant-id`
+- `x-user-id`
 
 ---
 
@@ -75,7 +116,7 @@ Future domains (planned, not implemented yet):
 ### Start all services
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ### Services
@@ -90,38 +131,44 @@ docker-compose up -d
 ### Rebuild after changes
 
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 ### View logs
 
 ```bash
-docker-compose logs -f api
+docker compose logs -f api
 ```
 
 ### Stop all services
 
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ---
 
 ## Local Development (without Docker)
 
-Run the API directly on your machine while using Docker for Postgres and Redis:
+By default, the API runs on port 3000.
+
+If port 3000 is already in use (for example, by the Docker API container), you can override the port locally using the PORT environment variable.
 
 ```bash
 # Start database and Redis
-docker-compose up -d postgres redis
+docker compose up -d postgres redis
 
-# Run API locally (uses port 4001)
+# Run API locally (port configurable via PORT)
 cd backend && npm run dev
 ```
 
-- **Local API**: `http://localhost:4001`
-- **Docker API**: `http://localhost:3000`
+- **Local API**(optional override): `http://localhost:4001`
+- **Docker API**(default): `http://localhost:3000`
 
+Example backend/.env:
+```bash
+PORT=4001
+```
 Both can run simultaneously without conflicts.
 
 ---
