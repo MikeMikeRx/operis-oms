@@ -32,6 +32,11 @@ It is a **backend product skeleton** that could safely run in production.
   - Middleware-enforced access checks
   - No route bypasses authorization
 
+- **Authentication**
+  - JWT-based authentication (Bearer tokens)
+  - Refresh tokens with rotation and server-side revocation
+  - Logout support
+
 - **Product Operations**
   - Create, list, update, soft-delete products
   - Tenant-scoped access only
@@ -104,10 +109,13 @@ This project exists to demonstrate **backend operations**, not product features.
 - Health check: `/health`
 - Meta endpoint: `/api/v1/meta`
 
+Authentication:
+- JWT Bearer access tokens (`Authorization: Bearer <token>`)
+- Refresh tokens for session continuation
+- Logout endpoint revoking refresh tokens
+
 All write endpoints require:
 - `Idempotency-Key`
-- `x-tenant-id`
-- `x-user-id`
 
 ---
 
