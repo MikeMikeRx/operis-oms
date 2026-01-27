@@ -15,8 +15,21 @@ export function tenantDb(prisma: PrismaClient, tenantId: string) {
         }),
       findUniqueBySku: (sku: string) =>
         prisma.product.findUnique({ where: { tenantId_sku: { tenantId, sku } } }),
-      create: (data: Omit<Prisma.ProductUncheckedCreateInput, "tenantId">) =>
-        prisma.product.create({ data: { ...data, tenantId } }),
+      create: async (data: Omit<Prisma.ProductUncheckedCreateInput, "tenantId">) => {
+        try {
+          return await prisma.product.create({
+            data: { ...data, tenantId }
+          });
+        } catch (err) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === "P2002"
+          ) {
+            throw new Error("SKU_ALREADY_EXIST");
+          }
+          throw err;
+        }
+      },
       updateMany: (args: { where: Prisma.ProductWhereInput; data: Prisma.ProductUpdateInput }) =>
         prisma.product.updateMany({
           where: { ...args.where, tenantId, deletedAt: null },

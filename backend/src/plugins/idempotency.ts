@@ -24,6 +24,10 @@ export default fp(async function (app: FastifyInstance) {
   // 1) Validate + short-circuit on duplicates
   app.addHook("preHandler", async (req: FastifyRequest, reply: FastifyReply) => {
     const method = req.method.toUpperCase();
+    
+    const rawPath = req.url.split("?")[0];
+    if (rawPath === "/api/v1/auth" || rawPath.startsWith("/api/v1/auth/")) return;
+
     const isWrite = method === "POST" || method === "PATCH" || method === "PUT" || method === "DELETE";
     if (!isWrite) return;
 

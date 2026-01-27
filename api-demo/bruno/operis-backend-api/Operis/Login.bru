@@ -12,11 +12,13 @@ post {
 
 headers {
   Idempotency-key: Login-test-user
+  Content-Type: application/json
 }
 
 body:json {
   {
     "name":"user1",
+    "tenantId":"t1",
     "email":"user@test.local",
     "password":"password123"
   }

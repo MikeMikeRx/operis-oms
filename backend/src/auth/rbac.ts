@@ -6,6 +6,12 @@ export function requirePerm(perm: string) {
     const app = req.server;
     const prisma: PrismaClient = (app as any).prisma;
 
+    const auth = (req as any).auth;
+
+    if (!auth?.tenantId || !auth?.userId) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }    
+
     const { tenantId, userId } = (req as any).auth;
 
     const user = await prisma.user.findFirst({

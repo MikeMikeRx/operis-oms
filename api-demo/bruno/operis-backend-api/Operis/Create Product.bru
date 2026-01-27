@@ -1,0 +1,37 @@
+meta {
+  name: Create Product
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseURL}}/api/v1/products
+  body: json
+  auth: inherit
+}
+
+headers {
+  Idempotency-Key: {{uuid}}
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+}
+
+body:json {
+  {
+    "name": "Test Token Auth",
+    "sku": "SKU-${Date.now()}",
+    "price": 1500
+  }
+  
+}
+
+vars:pre-request {
+  baseURL: http://localhost:4001
+  uuid: 6f2b1f3e-9c7b-4f0a-9a2f-9c2f6e3d3a11
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1MSIsInRlbmFudElkIjoidDEiLCJyb2xlSWQiOiJyMSIsImlhdCI6MTc2OTUyMzAzNywiZXhwIjoxNzY5NTIzOTM3fQ.ij1kd26oWBg0-kvNqxOX-n411fFhJzaarNfUOZdTs8w
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

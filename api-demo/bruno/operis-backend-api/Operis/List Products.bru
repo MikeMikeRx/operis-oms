@@ -1,0 +1,28 @@
+meta {
+  name: List Products
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseURL}}/api/v1/products
+  body: none
+  auth: inherit
+}
+
+headers {
+  Authorization: Bearer {{token}}
+  ~Idempotency-Key: {{uuid}}
+  ~Content-Type: application/json
+}
+
+vars:pre-request {
+  baseURL: http://localhost:4001
+  uuid: t1
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJ1MSIsInRlbmFudElkIjoidDEiLCJyb2xlSWQiOiJyMSIsImlhdCI6MTc2OTUyMTUyNiwiZXhwIjoxNzY5NTIyNDI2fQ.jgl3I2b-8wDHeETWqPsnGEgXDwrAZ8x5hH2iFioJphs
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

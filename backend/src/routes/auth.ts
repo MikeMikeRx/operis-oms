@@ -10,7 +10,7 @@ const LoginBody = z.object({
 
 export async function authRoutes(app: FastifyInstance) {
   app.post(
-    "/api/v1/auth/login",
+    "/auth/login",
     {
       schema: {
         tags: ["auth"],
