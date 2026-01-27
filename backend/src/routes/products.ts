@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { requireAuth } from "../auth/requireAuth.js";
 import { requirePerm } from "../auth/rbac.js";
 import { tenantDb } from "../db/tenant.js";
 import { CreateProductBody, UpdateProductBody } from "./product.schemas.js";
@@ -8,7 +9,7 @@ export async function productsRoutes(app: FastifyInstance) {
   app.get(
     "/products",
     {
-      preHandler: [requirePerm("product:read")],
+      preHandler: [requireAuth, requirePerm("product:read")],
       config: { rateLimit: { max: 120, timeWindow: "1 minute" } },
       schema: {
         tags: ["products"],
@@ -22,7 +23,7 @@ export async function productsRoutes(app: FastifyInstance) {
     },
     async (req) => {
       const limit = Math.min(Number((req.query as any)?.limit ?? 20), 100);
-      const db = tenantDb(app.prisma, req.tenantId);
+      const db = tenantDb(app.prisma, req.auth.tenantId);
       return db.product.findMany({ take: limit, orderBy: { createdAt: "desc" } });
     }
   );
@@ -30,19 +31,19 @@ export async function productsRoutes(app: FastifyInstance) {
   app.post(
     "/products",
     {
-      preHandler: [requirePerm("product:write")],
+      preHandler: [requireAuth, requirePerm("product:write")],
       config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
       schema: { tags: ["products"] },
     },
     async (req, reply) => {
       const body = CreateProductBody.parse(req.body);
-      const db = tenantDb(app.prisma, req.tenantId);
+      const db = tenantDb(app.prisma, req.auth.tenantId);
 
       const created = await db.product.create(body);
 
       await writeAudit(app.prisma, {
-        tenantId: req.tenantId,
-        actorId: req.userId,
+        tenantId: req.auth.tenantId,
+        actorId: req.auth.userId,
         action: "product.create",
         entity: "Product",
         entityId: created.id,
@@ -56,7 +57,7 @@ export async function productsRoutes(app: FastifyInstance) {
   app.patch(
     "/products/:id",
     {
-      preHandler: [requirePerm("product:write")],
+      preHandler: [requireAuth, requirePerm("product:write")],
       config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
       schema: {
         tags: ["products"],
@@ -71,21 +72,21 @@ export async function productsRoutes(app: FastifyInstance) {
       const id = (req.params as any).id as string;
       const body = UpdateProductBody.parse(req.body);
 
-      const db = tenantDb(app.prisma, req.tenantId);
+      const db = tenantDb(app.prisma, req.auth.tenantId);
 
       const res = await db.product.updateMany({
-        where: { id }, // tenant + deletedAt filtering handled by tenantDb wrapper
+        where: { id },
         data: body,
       });
 
       if (res.count === 0) return reply.code(404).send({ error: "not found" });
 
       const updated = await db.product.findFirst({ where: { id } });
-      if (!updated) return reply.code(404).send({ error: "not found" }); // defensive
+      if (!updated) return reply.code(404).send({ error: "not found" });
 
       await writeAudit(app.prisma, {
-        tenantId: req.tenantId,
-        actorId: req.userId,
+        tenantId: req.auth.tenantId,
+        actorId: req.auth.userId,
         action: "product.update",
         entity: "Product",
         entityId: id,
@@ -99,7 +100,7 @@ export async function productsRoutes(app: FastifyInstance) {
   app.delete(
     "/products/:id",
     {
-      preHandler: [requirePerm("product:write")],
+      preHandler: [requireAuth, requirePerm("product:write")],
       config: { rateLimit: { max: 60, timeWindow: "1 minute" } },
       schema: {
         tags: ["products"],
@@ -113,7 +114,7 @@ export async function productsRoutes(app: FastifyInstance) {
     async (req, reply) => {
       const id = (req.params as any).id as string;
 
-      const db = tenantDb(app.prisma, req.tenantId);
+      const db = tenantDb(app.prisma, req.auth.tenantId);
 
       const res = await db.product.updateMany({
         where: { id },
@@ -123,8 +124,8 @@ export async function productsRoutes(app: FastifyInstance) {
       if (res.count === 0) return reply.code(404).send({ error: "not found" });
 
       await writeAudit(app.prisma, {
-        tenantId: req.tenantId,
-        actorId: req.userId,
+        tenantId: req.auth.tenantId,
+        actorId: req.auth.userId,
         action: "product.delete",
         entity: "Product",
         entityId: id,

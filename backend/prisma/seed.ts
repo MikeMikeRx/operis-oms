@@ -1,6 +1,8 @@
+import bcrypt from "bcrypt";
 import { prisma } from "../src/db/prisma.js";
 
 async function main() {
+  const seedPassword = await bcrypt.hash("password123", 12);
   // --- tenant 1 ---
   const t1 = await prisma.tenant.upsert({
     where: { id: "t1" },
@@ -19,7 +21,7 @@ async function main() {
       id: "r1",
       tenantId: t1.id,
       name: "ADMIN",
-      permissions: ["product:read", "product:write"],
+      permissions: ["product:read", "product:write", "audit:read"],
     },
   });
 
@@ -32,6 +34,7 @@ async function main() {
       email: "user@test.local",
       tenantId: t1.id,
       roleId: r1.id,
+      passwordHash: seedPassword,
     },
   });
 
@@ -59,7 +62,7 @@ async function main() {
       id: "r2",
       tenantId: t2.id,
       name: "ADMIN",
-      permissions: ["product:read", "product:write"],
+      permissions: ["product:read", "product:write", "audit:read"],
     },
   });
 
@@ -72,6 +75,7 @@ async function main() {
       email: "user2@test.local",
       tenantId: t2.id,
       roleId: r2.id,
+      passwordHash: seedPassword,
     },
   });
 

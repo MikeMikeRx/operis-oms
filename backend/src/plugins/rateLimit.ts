@@ -10,10 +10,9 @@ export default fp(async function (app: FastifyInstance) {
 
   await app.register(rateLimit, {
     redis,
-    global: false, // will apply per-route
+    global: false,
     keyGenerator: (req) => {
-      // per-tenant quota key (fallback to IP if missing)
-      const tenantId = (req as any).tenantId;
+      const tenantId = (req as any).auth?.tenantId;
       return tenantId ? `tenant:${tenantId}` : req.ip;
     },
     addHeaders: {

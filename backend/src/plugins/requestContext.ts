@@ -30,8 +30,6 @@ export default fp(async function (app: FastifyInstance) {
 
     reply.header("x-request-id", requestId);
 
-    // Attach to every log line automatically
-    // TODO: add tenantId/userId once auth exists
     req.log = req.log.child({ requestId });
   });
 });

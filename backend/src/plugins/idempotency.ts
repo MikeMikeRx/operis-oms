@@ -32,8 +32,8 @@ export default fp(async function (app: FastifyInstance) {
       return reply.code(400).send({ error: "Idempotency-Key header is required for write requests" });
     }
 
-    const tenantId = (req as any).tenantId as string | undefined;
-    if (!tenantId) return; // tenantContext should handle this
+    const tenantId = (req as any).auth?.tenantId as string | undefined;
+    if (!tenantId) return;
 
     const path = req.routeOptions?.url ?? req.url.split("?")[0];
     const bodyStr = req.body === undefined ? "" : JSON.stringify(req.body);
@@ -48,14 +48,13 @@ export default fp(async function (app: FastifyInstance) {
         return reply.code(409).send({ error: "Idempotency-Key reused with different request" });
       }
 
-      // Return cached response exactly
+      // Return cached response
       const statusCode = (existing.response as any)?.statusCode ?? 200;
       const body = (existing.response as any)?.body ?? existing.response;
 
       return reply.code(statusCode).send(body);
     }
 
-    // Store context for onSend hook
     req.idempotency = { tenantId, key: key.trim(), method, path, requestHash };
   });
 
@@ -72,8 +71,6 @@ export default fp(async function (app: FastifyInstance) {
 
     const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
-    // IMPORTANT: avoid blowing up the request if insert fails due to race
-    // (two concurrent identical requests with same key)
     try {
       await app.prisma.idempotencyKey.create({
         data: {
@@ -87,7 +84,6 @@ export default fp(async function (app: FastifyInstance) {
         },
       });
     } catch (e: any) {
-      // ignore unique constraint races; anything else should be logged
       req.log.warn({ err: e }, "idempotency write failed");
     }
 

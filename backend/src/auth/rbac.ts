@@ -6,8 +6,10 @@ export function requirePerm(perm: string) {
     const app = req.server;
     const prisma: PrismaClient = (app as any).prisma;
 
+    const { tenantId, userId } = (req as any).auth;
+
     const user = await prisma.user.findFirst({
-      where: { id: (req as any).userId, tenantId: (req as any).tenantId },
+      where: { id: userId, tenantId },
       select: { role: { select: { permissions: true } } },
     });
 

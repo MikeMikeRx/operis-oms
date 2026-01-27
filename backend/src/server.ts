@@ -8,8 +8,6 @@ const host = process.env.HOST ?? "0.0.0.0";
 
 try {
   await app.listen({ port, host });
-
-  // Start background/maintenance jobs AFTER server is up
   await ensureMaintenanceJobs();
 } catch (err) {
   app.log.error(err);

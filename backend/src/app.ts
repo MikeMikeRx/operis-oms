@@ -2,15 +2,15 @@ import Fastify from "fastify";
 
 // Plugins
 import requestContextPlugin from "./plugins/requestContext.js";
-import tenantContextPlugin from "./plugins/tenantContext.js";
-import userContextPlugin from "./plugins/userContext.js";
 import idempotencyPlugin from "./plugins/idempotency.js";
 import rateLimitPlugin from "./plugins/rateLimit.js";
 import swaggerPlugin from "./plugins/swagger.js";
 import dbPlugin from "./plugins/db.js";
+import jwtPlugin from "./plugins/jwt.js";
 
 // Routes
 import { productsRoutes } from "./routes/products.js";
+import { authRoutes } from "./routes/auth.js";
 
 // App factory for server and tests
 export function buildApp() {
@@ -27,18 +27,18 @@ export function buildApp() {
   // --- Core plugins ---
   app.register(requestContextPlugin); // request ID, base logger
   app.register(dbPlugin);             // Prisma client
-  app.register(tenantContextPlugin);  // x-tenant-id extraction
-  app.register(userContextPlugin);    // x-user-id extraction
 
   // --- Security & protection ---
   app.register(rateLimitPlugin);      // per-tenant rate limits
   app.register(idempotencyPlugin);    // safe write retries
+  app.register(jwtPlugin);
 
   // --- Documentation ---
   app.register(swaggerPlugin);        // OpenAPI docs at /docs
 
   // --- Business routes ---
   app.register(productsRoutes, { prefix: "/api/v1" });
+  app.register(authRoutes);
 
   // --- System routes ---
   app.get(
