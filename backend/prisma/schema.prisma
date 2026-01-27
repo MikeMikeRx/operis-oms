@@ -13,25 +13,27 @@ model Tenant {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  users      User[]
-  roles      Role[]
-  products   Product[]
-  movements  StockMovement[]
-  auditLogs  AuditLog[]
-  idemKeys   IdempotencyKey[]
+  users         User[]
+  roles         Role[]
+  products      Product[]
+  movements     StockMovement[]
+  auditLogs     AuditLog[]
+  idemKeys      IdempotencyKey[]
+  refreshTokens RefreshToken[]
 
   @@index([createdAt])
 }
 
 model User {
-  id            String   @id @default(uuid())
+  id            String         @id @default(uuid())
   tenantId      String
   email         String
   name          String?
   passwordHash  String
   roleId        String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  refreshTokens RefreshToken[]
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   role   Role   @relation(fields: [roleId], references: [id])
@@ -42,12 +44,12 @@ model User {
 }
 
 model Role {
-  id        String   @id @default(uuid())
-  tenantId  String
-  name      String
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
   permissions String[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   users  User[]
@@ -57,14 +59,14 @@ model Role {
 }
 
 model Product {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   tenantId  String
   sku       String
   name      String
-  unit      String?  // "pcs", "kg", etc
+  unit      String? // "pcs", "kg", etc
   deletedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   tenant    Tenant          @relation(fields: [tenantId], references: [id])
   movements StockMovement[]
@@ -128,4 +130,21 @@ model IdempotencyKey {
 
   @@unique([tenantId, key])
   @@index([tenantId, expiresAt])
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  tenantId  String
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+  revokedAt DateTime?
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([tokenHash])
+  @@index([tenantId, userId, expiresAt])
+  @@index([tenantId, revokedAt])
 }

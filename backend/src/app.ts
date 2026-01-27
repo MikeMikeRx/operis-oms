@@ -1,5 +1,8 @@
 import Fastify from "fastify";
 
+// Cookie
+import cookie from "@fastify/cookie";
+
 // Plugins
 import requestContextPlugin from "./plugins/requestContext.js";
 import idempotencyPlugin from "./plugins/idempotency.js";
@@ -41,6 +44,12 @@ export function buildApp() {
   // --- Business routes ---
   app.register(authRoutes, {prefix: "/api/v1" });
   app.register(productsRoutes, { prefix: "/api/v1" });
+
+  // --- Cookie ---
+  app.register(cookie, {
+    secret: process.env.COOKIE_SECRET ?? process.env.JWT_SECRET,
+    hook: "onRequest",
+  });
 
   // --- System routes ---
   app.get(
