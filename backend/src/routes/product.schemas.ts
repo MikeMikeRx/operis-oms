@@ -6,7 +6,11 @@ export const CreateProductBody = z.object({
   unit: z.string().min(1).max(32).optional(),
 });
 
+export type CreateProductBodyType = z.infer<typeof CreateProductBody>;
+
 export const UpdateProductBody = z.object({
   name: z.string().min(1).max(200).optional(),
   unit: z.string().min(1).max(32).optional(),
 }).refine((v) => Object.keys(v).length > 0, { message: "no fields to update" });
+
+export type UpdateProductBodyType = z.infer<typeof UpdateProductBody>;

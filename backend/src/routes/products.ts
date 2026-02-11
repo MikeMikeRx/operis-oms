@@ -2,11 +2,14 @@ import type { FastifyInstance } from "fastify";
 import { requireAuth } from "../auth/requireAuth.js";
 import { requirePerm } from "../auth/rbac.js";
 import { tenantDb } from "../db/tenant.js";
-import { CreateProductBody, UpdateProductBody } from "./product.schemas.js";
+import { CreateProductBody, UpdateProductBody, type CreateProductBodyType, type UpdateProductBodyType } from "./product.schemas.js";
 import { writeAudit } from "../audit/audit.js";
 
+interface ProductQuery { limit?: number }
+interface ProductParams { id: string }
+
 export async function productsRoutes(app: FastifyInstance) {
-  app.get(
+  app.get<{ Querystring: ProductQuery }>(
     "/products",
     {
       preHandler: [requireAuth, requirePerm("product:read")],
@@ -22,13 +25,17 @@ export async function productsRoutes(app: FastifyInstance) {
       },
     },
     async (req) => {
-      const limit = Math.min(Number((req.query as any)?.limit ?? 20), 100);
+      const raw = req.query.limit;
+      const parsed = typeof raw === "number" ? raw : Number(raw ?? 20);
+      const limit = Number.isFinite(parsed) ? Math.min(parsed, 100) : 20;
+
       const db = tenantDb(app.prisma, req.auth.tenantId);
+
       return db.product.findMany({ take: limit, orderBy: { createdAt: "desc" } });
     }
   );
 
-  app.post(
+  app.post<{ Body: CreateProductBodyType }>(
     "/products",
     {
       preHandler: [requireAuth, requirePerm("product:write")],
@@ -54,7 +61,7 @@ export async function productsRoutes(app: FastifyInstance) {
     }
   );
 
-  app.patch(
+  app.patch<{ Params: ProductParams; Body: UpdateProductBodyType }>(
     "/products/:id",
     {
       preHandler: [requireAuth, requirePerm("product:write")],
@@ -64,12 +71,12 @@ export async function productsRoutes(app: FastifyInstance) {
         params: {
           type: "object",
           required: ["id"],
-          properties: { id: { type: "string" } },
+          properties: { id: { type: "string", minLength: 1} },
         },
       },
     },
     async (req, reply) => {
-      const id = (req.params as any).id as string;
+      const { id } = req.params;
       const body = UpdateProductBody.parse(req.body);
 
       const db = tenantDb(app.prisma, req.auth.tenantId);
@@ -97,7 +104,7 @@ export async function productsRoutes(app: FastifyInstance) {
     }
   );
 
-  app.delete(
+  app.delete<{ Params: ProductParams }>(
     "/products/:id",
     {
       preHandler: [requireAuth, requirePerm("product:write")],
@@ -107,12 +114,12 @@ export async function productsRoutes(app: FastifyInstance) {
         params: {
           type: "object",
           required: ["id"],
-          properties: { id: { type: "string" } },
+          properties: { id: { type: "string", minLength: 1 } },
         },
       },
     },
     async (req, reply) => {
-      const id = (req.params as any).id as string;
+      const { id } = req.params;
 
       const db = tenantDb(app.prisma, req.auth.tenantId);
 
