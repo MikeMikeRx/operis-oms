@@ -19,6 +19,7 @@ export async function authRoutes(app: FastifyInstance) {
   app.post(
     "/auth/login",
     {
+      config: { rateLimit: { max: 10, timeWindow: "1 minute" } },
       schema: {
         tags: ["auth"],
         body: {
@@ -91,7 +92,7 @@ export async function authRoutes(app: FastifyInstance) {
     }
   );
 
-  app.post("/auth/refresh", async (req, reply) => {
+  app.post("/auth/refresh", { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } }, async (req, reply) => {
     const token = req.cookies[REFRESH_COOKIE];
     if(!token) return reply.code(401).send({ error: "missing_refresh_token" });
 
@@ -115,23 +116,24 @@ export async function authRoutes(app: FastifyInstance) {
     });
     if(!user) return reply.code(401).send({ error: "invalid_refresh_token" });
 
-    await app.prisma.refreshToken.update({
-      where: { id: existing.id },
-      data: { revokedAt: now },
-    });
-
     const newToken = newRefreshToken();
     const newHash = hashToken(newToken);
     const expiresAt = refreshExpiresAt();
 
-    await app.prisma.refreshToken.create({
-      data: {
-        tenantId: user.tenantId,
-        userId: user.id,
-        tokenHash: newHash,
-        expiresAt,
-      },
-    });
+    await app.prisma.$transaction([
+      app.prisma.refreshToken.update({
+        where: { id: existing.id },
+        data: { revokedAt: now },
+      }),
+      app.prisma.refreshToken.create({
+        data: {
+          tenantId: user.tenantId,
+          userId: user.id,
+          tokenHash: newHash,
+          expiresAt,
+        },
+      }),
+    ]);
 
     reply.setCookie(REFRESH_COOKIE, newToken, refreshCookieOptions());
 
@@ -143,7 +145,7 @@ export async function authRoutes(app: FastifyInstance) {
     return reply.send({ accessToken });
   });
 
-  app.post("/auth/logout", async (req, reply) => {
+  app.post("/auth/logout", { config: { rateLimit: { max: 20, timeWindow: "1 minute" } } }, async (req, reply) => {
     const token = req.cookies[REFRESH_COOKIE];
     if (token) {
       const tokenHash = hashToken(token);
