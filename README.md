@@ -1,8 +1,6 @@
 # OPERIS CORE
 
-**Operis Operations Core** is a backend-first, multi-tenant API providing reliable foundations for internal business operations.
-
-The system prioritizes **operational correctness, data isolation, and reliability** over UI or feature breadth.
+**Operis Operations Core** is a backend-first, multi-tenant SaaS providing reliable foundations for internal business operations.
 
 ---
 
@@ -12,9 +10,6 @@ The system prioritizes **operational correctness, data isolation, and reliabilit
 - Backend-first and API-only (no frontend)
 - Designed around real-world operational constraints
 - Built with production patterns from day one
-
-This is **not a demo app**.  
-It is a **backend product skeleton** that could safely run in production.
 
 ---
 
@@ -71,17 +66,6 @@ It is a **backend product skeleton** that could safely run in production.
   - HTTP-level contract tests
   - CI-enforced
   - OpenAPI kept in sync with behavior
-
----
-
-## What This Project Is Not
-
-- Not a CRM  
-- Not a full ERP  
-- Not UI-driven  
-- Not feature-complete business software  
-
-This project exists to demonstrate **backend operations**, not product features.
 
 ---
 
