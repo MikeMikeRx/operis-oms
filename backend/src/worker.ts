@@ -4,6 +4,7 @@ import { prisma } from "./db/prisma.js";
 import { cleanupIdempotencyKeys } from "./workers/jobs/cleanupIdempotency.js";
 import { purgeSoftDeletedProducts } from "./workers/jobs/purgeSoftDeletedProducts.js";
 import { purgeAuditLogs } from "./workers/jobs/purgeAuditLogs.js";
+import { purgeExpiredRefreshTokens } from "./workers/jobs/purgeExpiredRefreshTokens.js";
 
 const worker = new Worker(
   "maintenance",
@@ -15,6 +16,8 @@ const worker = new Worker(
         return purgeSoftDeletedProducts(prisma);
       case "purge-audit-logs":
         return purgeAuditLogs(prisma);
+      case "purge-expired-refresh-tokens":
+        return purgeExpiredRefreshTokens(prisma);
       default:
         throw new Error(`Unknown job: ${job.name}`);
     }

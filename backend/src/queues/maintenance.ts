@@ -21,4 +21,10 @@ export async function ensureMaintenanceJobs() {
     {},
     { repeat: { every: 24 * 60 * 60 * 1000, immediately: true }, removeOnComplete: true }
   );
+
+  await maintenanceQueue.add(
+    "purge-expired-refresh-tokens",
+    {},
+    { repeat: { every: 24 * 60 * 60 * 1000, immediately: true }, removeOnComplete: true }
+  );
 }
