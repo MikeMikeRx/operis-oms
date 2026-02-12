@@ -16,7 +16,7 @@ function cookieHeaderFromSetCookie(setCookie: string | string[] | undefined): st
 
 beforeAll(async () => {
   process.env.JWT_EXPIRES_IN = "1s";
-  process.env.REFRESH_EXPIRES_DAYS = "14";
+  process.env.REFRESH_DAYS = "14";
 
   app = buildApp();
   await app.ready();
