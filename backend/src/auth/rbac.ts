@@ -1,18 +1,15 @@
 import type { FastifyRequest, FastifyReply } from "fastify";
-import type { PrismaClient } from "../generated/prisma/client.js";
 
 export function requirePerm(perm: string) {
   return async (req: FastifyRequest, reply: FastifyReply) => {
-    const app = req.server;
-    const prisma: PrismaClient = (app as any).prisma;
-
-    const auth = (req as any).auth;
+    const { prisma } = req.server;
+    const { auth } = req;
 
     if (!auth?.tenantId || !auth?.userId) {
       return reply.code(401).send({ error: "unauthorized" });
-    }    
+    }
 
-    const { tenantId, userId } = (req as any).auth;
+    const { tenantId, userId } = auth;
 
     const user = await prisma.user.findFirst({
       where: { id: userId, tenantId },
