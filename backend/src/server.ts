@@ -17,8 +17,13 @@ process.on("SIGTERM", () => shutdown("SIGTERM"));
 
 try {
   await app.listen({ port, host });
-  await ensureMaintenanceJobs();
 } catch (err) {
   app.log.error(err);
   process.exit(1);
+}
+
+try {
+  await ensureMaintenanceJobs();
+} catch (err) {
+  app.log.error(err, "failed to schedule maintenance jobs");
 }
