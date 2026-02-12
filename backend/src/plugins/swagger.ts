@@ -4,6 +4,8 @@ import swaggerUI from "@fastify/swagger-ui";
 import type { FastifyInstance } from "fastify";
 
 export default fp(async function (app: FastifyInstance) {
+  if (process.env.NODE_ENV !== "development") return;
+
   await app.register(swagger, {
     openapi: {
       info: {
