@@ -2,7 +2,9 @@
 
 **Operis Operations Core** is a backend-first, multi-tenant SaaS providing reliable foundations for internal business operations.
 
-####  Live API Docs(Swagger): [View on Railway](https://operis-operations-core-production.up.railway.app/docs)
+
+#### Live API Docs(Swagger): [View on Railway](https://operis-operations-core-production.up.railway.app/docs)
+- To login use: [Demo Credentials](#demo-credentials)
 
 ---
 
@@ -166,5 +168,27 @@ Example backend/.env:
 PORT=4001
 ```
 Both can run simultaneously without conflicts.
+
+---
+
+## Production
+
+- **Base URL:** https://operis-operations-core-production.up.railway.app
+- **Swagger UI:** /docs
+- **Health:** /health
+
+---
+
+##  Demo Credentials
+
+Use these with `POST /api/v1/auth/login` to get an access token, then use the token in the `Authorization: Bearer <token>` header to access protected endpoints.
+
+```json
+{
+  "tenantId": "t1",
+  "email": "user@test.local",
+  "password": "password123"
+}
+```
 
 ---
